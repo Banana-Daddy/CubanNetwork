@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MatchFlow — Cuban Network Intelligence Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Source+Sans+3:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --clay: #C4784A;
+  --clay-50: #F7E8D8;
+  --clay-100: #EDCDB0;
+  --clay-200: #DDB08A;
+  --clay-600: #A5603A;
+  --clay-800: #7D4429;
+  --clay-900: #5A2F1B;
+  --bg: #111110;
+  --surface: #1A1918;
+  --surface-2: #242322;
+  --surface-3: #2E2D2B;
+  --border: #3A3835;
+  --border-light: #4A4845;
+  --text: #E8E3D8;
+  --text-muted: #9C9A92;
+  --text-dim: #6B6960;
+  --teal: #1D9E75;
+  --teal-bg: rgba(29,158,117,0.12);
+  --red: #E24B4A;
+  --red-bg: rgba(226,75,74,0.12);
+  --amber: #EF9F27;
+  --amber-bg: rgba(239,159,39,0.12);
+  --blue: #4A7FA5;
+  --blue-bg: rgba(74,127,165,0.12);
+  --purple: #7F77DD;
+  --purple-bg: rgba(127,119,221,0.12);
+  --green: #3E7A52;
+  --green-bg: rgba(62,122,82,0.12);
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body: 'Source Sans 3', system-ui, sans-serif;
+  --font-data: 'JetBrains Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+body { font-family: var(--font-body); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+::selection { background: var(--clay); color: #fff; }
+
+/* Navigation */
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(17,17,16,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+.nav-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; height: 56px; gap: 32px; }
+.nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0; }
+.nav-logo-mark { width: 28px; height: 28px; border-radius: 6px; background: var(--clay); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 14px; color: #fff; }
+.nav-logo-text { font-family: var(--font-display); font-size: 16px; color: var(--text); }
+.nav-links { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; flex: 1; }
+.nav-links::-webkit-scrollbar { display: none; }
+.nav-link { font-size: 12px; color: var(--text-muted); text-decoration: none; padding: 6px 10px; border-radius: 6px; white-space: nowrap; transition: all 0.15s; }
+.nav-link:hover, .nav-link.active { color: var(--clay); background: rgba(196,120,74,0.08); }
+.nav-badge { font-family: var(--font-data); font-size: 10px; color: var(--text-dim); padding: 3px 8px; border: 1px solid var(--border); border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+
+/* Layout */
+.page { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+section { padding: 80px 0 40px; border-bottom: 1px solid var(--border); }
+section:last-child { border-bottom: none; }
+
+/* Typography */
+.hero-title { font-family: var(--font-display); font-size: clamp(32px, 5vw, 52px); color: var(--text); line-height: 1.15; margin-bottom: 20px; }
+.hero-title .clay { color: var(--clay); }
+h2 { font-family: var(--font-display); font-size: clamp(22px, 3vw, 30px); color: var(--text); margin-bottom: 8px; line-height: 1.3; }
+h3 { font-family: var(--font-body); font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.section-subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; line-height: 1.6; max-width: 640px; }
+p { margin-bottom: 16px; }
+.muted { color: var(--text-muted); }
+.clay-text { color: var(--clay); }
+.data { font-family: var(--font-data); }
+
+/* Metric cards */
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 32px; }
+.metric { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+.metric-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.metric-value { font-family: var(--font-data); font-size: 24px; font-weight: 500; color: var(--text); }
+.metric-note { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+/* Tags */
+.tag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; }
+.tag-clay { background: rgba(196,120,74,0.15); color: var(--clay); }
+.tag-teal { background: var(--teal-bg); color: var(--teal); }
+.tag-red { background: var(--red-bg); color: var(--red); }
+.tag-amber { background: var(--amber-bg); color: var(--amber); }
+.tag-blue { background: var(--blue-bg); color: var(--blue); }
+.tag-green { background: var(--green-bg); color: var(--green); }
+.tag-purple { background: var(--purple-bg); color: var(--purple); }
+
+/* Cards */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 12px; }
+.card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.card-title { font-weight: 600; font-size: 14px; color: var(--text); }
+.card-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* Hero */
+.hero { padding: 120px 0 60px; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
+.hero::before { content: ''; position: absolute; top: -200px; right: -200px; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, rgba(196,120,74,0.06) 0%, transparent 70%); pointer-events: none; }
+.hero-meta { display: flex; gap: 16px; align-items: center; margin-bottom: 24px; flex-wrap: wrap; }
+.hero-meta-item { font-size: 12px; color: var(--text-dim); display: flex; align-items: center; gap: 6px; }
+.hero-meta-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--clay); }
+.hero-summary { font-size: 16px; color: var(--text-muted); line-height: 1.7; max-width: 720px; margin-bottom: 32px; }
+
+/* Exec summary callouts */
+.callout { border-left: 3px solid var(--clay); padding: 16px 20px; background: var(--surface); border-radius: 0 10px 10px 0; margin-bottom: 16px; }
+.callout-title { font-weight: 600; font-size: 13px; color: var(--clay); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.3px; }
+.callout p { font-size: 14px; color: var(--text-muted); margin-bottom: 0; }
+.callout-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 32px; }
+
+/* Network SVG */
+.viz-container { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; overflow: hidden; }
+.viz-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; font-size: 11px; color: var(--text-muted); }
+.viz-legend-item { display: flex; align-items: center; gap: 5px; }
+.viz-legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+.viz-legend-line { width: 16px; height: 0; border-top: 2px solid; }
+
+/* Info panel */
+.info-panel { min-height: 60px; padding: 14px 18px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-top: 12px; }
+.info-panel strong { color: var(--text); font-weight: 500; }
+
+/* Filters */
+.filter-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.filter-btn { font-family: var(--font-body); font-size: 12px; padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.15s; }
+.filter-btn:hover { border-color: var(--border-light); color: var(--text); }
+.filter-btn.active { background: var(--clay); border-color: var(--clay); color: #fff; }
+
+/* Scoring table */
+.score-table { width: 100%; border-collapse: collapse; }
+.score-table th { text-align: center; padding: 8px 4px; font-size: 11px; font-weight: 500; color: var(--text-dim); border-bottom: 1px solid var(--border); }
+.score-table th:first-child { text-align: left; }
+.score-table td { padding: 8px 4px; border-bottom: 1px solid var(--border); text-align: center; vertical-align: middle; }
+.score-table td:first-child { text-align: left; }
+.score-table tr:hover { background: var(--surface-2); }
+.score-name { font-weight: 500; font-size: 13px; color: var(--text); }
+.score-type { font-size: 10px; color: var(--text-dim); }
+.score-dot { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 6px; font-family: var(--font-data); font-size: 11px; font-weight: 500; }
+.sd-5 { background: rgba(29,158,117,0.25); color: #5DCAA5; }
+.sd-4 { background: rgba(29,158,117,0.15); color: #1D9E75; }
+.sd-3 { background: rgba(29,158,117,0.08); color: #9FE1CB; }
+.sd-2 { background: rgba(136,135,128,0.12); color: #9C9A92; }
+.sd-1 { background: rgba(136,135,128,0.06); color: #6B6960; }
+.score-total { font-family: var(--font-data); font-weight: 500; font-size: 14px; color: var(--text); }
+.tier-badge { padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 500; }
+.tier-1 { background: var(--green-bg); color: var(--green); }
+.tier-2 { background: var(--blue-bg); color: var(--blue); }
+.tier-3 { background: var(--amber-bg); color: var(--amber); }
+
+/* Facility ownership */
+.owner-section { margin-bottom: 24px; }
+.owner-section-label { font-size: 11px; font-weight: 500; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+.owner-row { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start; }
+.owner-badge { min-width: 90px; max-width: 90px; padding: 10px 8px; border-radius: 8px; text-align: center; flex-shrink: 0; }
+.owner-badge-name { font-size: 11px; font-weight: 600; line-height: 1.3; }
+.owner-badge-role { font-size: 9px; margin-top: 2px; opacity: 0.8; }
+.fac-list { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 0; }
+.fac-card { border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; cursor: pointer; transition: all 0.2s; }
+.fac-card:hover { border-color: var(--border-light); background: var(--surface-2); }
+.fac-card.expanded { background: var(--surface-2); border-color: var(--clay); }
+.fac-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.fac-name { font-weight: 600; font-size: 13px; color: var(--text); }
+.fac-loc { font-size: 11px; color: var(--text-dim); }
+.fac-courts { text-align: right; }
+.fac-courts-num { font-family: var(--font-data); font-size: 18px; font-weight: 500; color: var(--text); }
+.fac-courts-note { font-size: 10px; color: var(--text-dim); }
+.fac-pills { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+.pill { padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 500; }
+.pill-pb { background: var(--purple-bg); color: var(--purple); }
+.pill-tn { background: var(--teal-bg); color: var(--teal); }
+.pill-pd { background: rgba(216,90,48,0.12); color: #D85A30; }
+.fac-detail { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+.fac-card.expanded .fac-detail { display: block; }
+.fac-detail-row { display: flex; justify-content: space-between; padding: 3px 0; }
+.fac-detail-label { color: var(--text-dim); }
+.sw-bad { color: var(--red); }
+.sw-ok { color: var(--amber); }
+.sw-unk { color: var(--text-dim); }
+.cuban-path-tag { font-size: 11px; margin-top: 8px; padding: 5px 10px; border-radius: 6px; background: var(--blue-bg); color: var(--blue); }
+
+/* Software gap table */
+.sg-table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; }
+.sg-table th { padding: 8px 4px; font-weight: 500; font-size: 10px; color: var(--text-dim); text-align: center; border-bottom: 1px solid var(--border); }
+.sg-table th:first-child { text-align: left; width: 130px; }
+.sg-table td { padding: 6px 4px; text-align: center; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.sg-table td:first-child { text-align: left; }
+.sg-table tr:hover { background: var(--surface-2); }
+.sg-cell { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 6px; font-size: 11px; font-weight: 500; }
+.sg-none { background: var(--red-bg); color: var(--red); }
+.sg-weak { background: var(--amber-bg); color: var(--amber); }
+.sg-ok { background: var(--teal-bg); color: var(--teal); }
+.sg-unk { background: rgba(136,135,128,0.08); color: var(--text-dim); }
+.sg-score { font-family: var(--font-data); font-weight: 500; font-size: 14px; color: var(--text); }
+.opp-hot { background: var(--red-bg); color: var(--red); }
+.opp-warm { background: var(--amber-bg); color: var(--amber); }
+.opp-cool { background: var(--blue-bg); color: var(--blue); }
+
+/* Dundon empire */
+.empire-layer { display: flex; gap: 8px; margin-bottom: 8px; align-items: stretch; }
+.empire-label { width: 100px; min-width: 100px; padding: 10px 8px; border-radius: 8px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 11px; font-weight: 500; }
+.empire-items { display: flex; gap: 6px; flex: 1; flex-wrap: wrap; }
+.empire-item { flex: 1; min-width: 120px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); }
+.empire-item-name { font-size: 12px; font-weight: 600; color: var(--text); }
+.empire-item-desc { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+.empire-owned { border-left: 3px solid var(--red); border-radius: 0 8px 8px 0; }
+.empire-competes { border-left: 3px solid var(--amber); border-radius: 0 8px 8px 0; }
+.empire-gap { border-left: 3px solid var(--teal); border-radius: 0 8px 8px 0; background: var(--teal-bg); }
+
+/* Path cards */
+.path-card { border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
+.path-card:hover { border-color: var(--border-light); background: var(--surface-2); }
+.path-card.expanded { background: var(--surface-2); border-color: var(--clay); }
+.path-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.path-label { font-weight: 600; font-size: 14px; color: var(--text); }
+.path-meta { display: flex; gap: 8px; align-items: center; }
+.path-flow { display: flex; align-items: center; gap: 0; flex-wrap: wrap; }
+.path-node { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+.pn-start { background: var(--clay); color: #fff; }
+.pn-mid { background: var(--surface-3); color: var(--text); border: 1px solid var(--border); }
+.pn-end { background: var(--teal-bg); color: var(--teal); }
+.path-arrow { font-size: 14px; color: var(--text-dim); padding: 0 4px; }
+.path-edge { font-size: 9px; color: var(--text-dim); text-align: center; }
+.path-detail { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+.path-card.expanded .path-detail { display: block; }
+
+/* Action plan */
+.timeline { position: relative; padding-left: 28px; }
+.timeline::before { content: ''; position: absolute; left: 8px; top: 4px; bottom: 4px; width: 1px; background: var(--border); }
+.tl-item { position: relative; margin-bottom: 24px; }
+.tl-item::before { content: ''; position: absolute; left: -24px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--clay); border: 2px solid var(--bg); }
+.tl-time { font-family: var(--font-data); font-size: 11px; color: var(--clay); margin-bottom: 4px; }
+.tl-title { font-weight: 600; font-size: 14px; color: var(--text); margin-bottom: 4px; }
+.tl-desc { font-size: 13px; color: var(--text-muted); }
+
+/* Footer */
+.footer { padding: 40px 0; text-align: center; font-size: 12px; color: var(--text-dim); }
+.footer-logo { font-family: var(--font-display); font-size: 18px; color: var(--clay); margin-bottom: 8px; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .owner-row { flex-direction: column; }
+  .owner-badge { max-width: 100%; min-width: auto; }
+  .empire-layer { flex-direction: column; }
+  .empire-label { width: 100%; min-width: auto; }
+  .callout-grid { grid-template-columns: 1fr; }
+  .metrics { grid-template-columns: repeat(2, 1fr); }
+  section { padding: 60px 0 30px; }
+}
+@media (max-width: 480px) {
+  .score-table { font-size: 10px; }
+  .score-dot { width: 22px; height: 22px; font-size: 10px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+<div class="nav-inner">
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-mark">MF</div>
+    <span class="nav-logo-text">MatchFlow</span>
+  </a>
+  <div class="nav-links">
+    <a href="#executive-summary" class="nav-link">Summary</a>
+    <a href="#network-map" class="nav-link">Network</a>
+    <a href="#scoring" class="nav-link">Scoring</a>
+    <a href="#gravity-map" class="nav-link">Gravity map</a>
+    <a href="#ownership" class="nav-link">Ownership</a>
+    <a href="#software-gaps" class="nav-link">Software gaps</a>
+    <a href="#dundon-empire" class="nav-link">Dundon empire</a>
+    <a href="#court-chart" class="nav-link">Court scale</a>
+    <a href="#intro-paths" class="nav-link">Intro paths</a>
+    <a href="#action-plan" class="nav-link">Action plan</a>
+  </div>
+  <span class="nav-badge">April 2026</span>
+</div>
+</nav>
+
+<div class="page">
+
+<!-- Hero -->
+<section class="hero" id="top">
+  <div class="hero-meta">
+    <span class="hero-meta-item"><span class="hero-meta-dot"></span>Strategic intelligence report</span>
+    <span class="hero-meta-item">Prepared April 13, 2026</span>
+    <span class="hero-meta-item">Public sources only</span>
+  </div>
+  <h1 class="hero-title">Mark Cuban's racquet-sports network<br><span class="clay">mapped for MatchFlow</span></h1>
+  <p class="hero-summary">A comprehensive business intelligence investigation mapping every confirmed connection between Mark Cuban and the racquet-sports ecosystem — pickleball, tennis, and padel — with facility ownership analysis, software gap scoring, and actionable warm-introduction paths for MatchFlow's go-to-market strategy.</p>
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">Confirmed ties</div>
+      <div class="metric-value">14</div>
+      <div class="metric-note">People, teams, investments</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Sellable facilities</div>
+      <div class="metric-value">9</div>
+      <div class="metric-note">In or near Cuban's orbit</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Courts addressable</div>
+      <div class="metric-value">800+</div>
+      <div class="metric-note">Across all targets</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Zero-tech facilities</div>
+      <div class="metric-value">3</div>
+      <div class="metric-note">No booking system at all</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Warm-intro paths</div>
+      <div class="metric-value">5</div>
+      <div class="metric-note">Distinct routes to Cuban</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Hops to Cuban (min)</div>
+      <div class="metric-value">1</div>
+      <div class="metric-note">Via Mark Molthan</div>
+    </div>
+  </div>
+</section>
+
+<!-- Executive Summary -->
+<section id="executive-summary">
+  <h2>Executive summary</h2>
+  <p class="section-subtitle">The three findings that change how you approach this market.</p>
+  
+  <div class="callout-grid">
+    <div class="callout">
+      <div class="callout-title">Correction #1</div>
+      <p>Cuban is a passive investor, not an operator. He co-owns the Dallas Flash but makes zero operational or technology decisions. <strong style="color:var(--text)">Mark Molthan</strong> — the team's Managing Director — is the gateway. Every pitch aimed at "Cuban's pickleball team" must go through Molthan first.</p>
+    </div>
+    <div class="callout">
+      <div class="callout-title">Correction #2</div>
+      <p>The most valuable facility in Cuban's orbit is <strong style="color:var(--text)">Banner House at T Bar M</strong> — a $70M luxury club with 45+ courts across tennis, pickleball, and padel — and it has <strong style="color:var(--red)">zero visible booking technology</strong>. Jessica Nowitzki (Dirk's wife) curates the art program there.</p>
+    </div>
+    <div class="callout">
+      <div class="callout-title">Correction #3</div>
+      <p>Cuban has <strong style="color:var(--text)">no confirmed padel investments</strong>. Low-quality sources conflate pickleball with padel. However, Banner House's 5 padel courts and the growing Texas padel market create indirect exposure through his network.</p>
+    </div>
+    <div class="callout">
+      <div class="callout-title">Biggest opportunity</div>
+      <p><strong style="color:var(--text)">Tom Dundon</strong> owns the entire pro pickleball stack — leagues, tours, e-commerce, media, software — but has <strong style="color:var(--teal)">two clear gaps: facility operations and team engagement platforms</strong>. Those gaps are exactly where MatchFlow lives.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Network Map -->
+<section id="network-map">
+  <h2>Cuban's racquet-sports network</h2>
+  <p class="section-subtitle">Every confirmed public tie between Mark Cuban and the racquet-sports ecosystem. Node color = sport focus. Click any node for details.</p>
+  
+  <div class="viz-container">
+    <div class="viz-legend">
+      <span class="viz-legend-item"><span class="viz-legend-dot" style="background:var(--purple)"></span>Pickleball</span>
+      <span class="viz-legend-item"><span class="viz-legend-dot" style="background:var(--teal)"></span>Tennis</span>
+      <span class="viz-legend-item"><span class="viz-legend-dot" style="background:#D85A30"></span>Multi-sport</span>
+      <span class="viz-legend-item"><span class="viz-legend-dot" style="background:var(--text-dim)"></span>Ecosystem / tech</span>
+      <span class="viz-legend-item"><span class="viz-legend-dot" style="background:var(--blue)"></span>League / org</span>
+      <span class="viz-legend-item" style="margin-left:auto;font-size:10px;opacity:0.6">Line thickness = relationship strength</span>
+    </div>
+    <div class="filter-bar" id="net-filters">
+      <button class="filter-btn active" onclick="filterNet('all',this)">All</button>
+      <button class="filter-btn" onclick="filterNet('direct',this)">Direct ties</button>
+      <button class="filter-btn" onclick="filterNet('indirect',this)">Indirect</button>
+      <button class="filter-btn" onclick="filterNet('facility',this)">Facilities</button>
+      <button class="filter-btn" onclick="filterNet('person',this)">People</button>
+    </div>
+    <svg id="net-svg" width="100%" viewBox="0 0 680 520"></svg>
+    <div class="info-panel" id="net-info">Click any node to see relationship details, buying authority, and strategic tier.</div>
+  </div>
+</section>
+
+<!-- Scoring Matrix -->
+<section id="scoring">
+  <h2>Target scoring matrix</h2>
+  <p class="section-subtitle">Every key target scored 1–5 across six dimensions. Sorted by composite score. The higher the total, the more valuable the target.</p>
+
+  <div class="viz-container">
+    <div class="viz-legend">
+      <span class="viz-legend-item"><span class="viz-legend-dot" style="background:rgba(29,158,117,0.25)"></span>5 = strongest</span>
+      <span class="viz-legend-item"><span class="viz-legend-dot" style="background:rgba(29,158,117,0.15)"></span>4</span>
+      <span class="viz-legend-item"><span class="viz-legend-dot" style="background:rgba(29,158,117,0.08)"></span>3</span>
+      <span class="viz-legend-item"><span class="viz-legend-dot" style="background:rgba(136,135,128,0.12)"></span>2</span>
+      <span class="viz-legend-item"><span class="viz-legend-dot" style="background:rgba(136,135,128,0.06)"></span>1 = weakest</span>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="score-table" id="score-tbl"></table>
+    </div>
+  </div>
+</section>
+
+<!-- Gravity Map -->
+<section id="gravity-map">
+  <h2>Facility gravity map</h2>
+  <p class="section-subtitle">Sellable facilities positioned by proximity to Cuban. Bubble size = court count. Red outline = zero booking technology. The closer to center, the warmer the intro path.</p>
+
+  <div class="viz-container">
+    <div class="viz-legend">
+      <span class="viz-legend-item"><svg width="14" height="14"><circle cx="7" cy="7" r="5" fill="none" stroke="var(--red)" stroke-width="2"/></svg>No booking tech</span>
+      <span class="viz-legend-item"><svg width="14" height="14"><circle cx="7" cy="7" r="5" fill="none" stroke="var(--amber)" stroke-width="2"/></svg>Weak / fragmented</span>
+      <span class="viz-legend-item"><svg width="14" height="14"><circle cx="7" cy="7" r="5" fill="none" stroke="var(--teal)" stroke-width="2"/></svg>Has something</span>
+      <span class="viz-legend-item" style="margin-left:auto;font-size:10px;opacity:0.6">Bubble size = court count</span>
+    </div>
+    <svg id="grav-svg" width="100%" viewBox="0 0 680 580"></svg>
+    <div class="info-panel" id="grav-info">Click any facility bubble to see owner, court count, software situation, and the path back to Cuban.</div>
+  </div>
+</section>
+
+<!-- Facility Ownership -->
+<section id="ownership">
+  <h2>Facility ownership map</h2>
+  <p class="section-subtitle">Who actually owns which facilities, what software they run, and how they connect back to Cuban. Click any facility card to expand.</p>
+
+  <div id="ownership-root"></div>
+</section>
+
+<!-- Software Gap Analysis -->
+<section id="software-gaps">
+  <h2>Software gap analysis</h2>
+  <p class="section-subtitle">Technology maturity across six dimensions for each target facility. Red = missing entirely. Amber = weak or fragmented. Sorted by gap severity.</p>
+
+  <div class="viz-container">
+    <div class="viz-legend">
+      <span class="viz-legend-item"><span class="viz-legend-dot" style="background:var(--red-bg)"></span>None / missing</span>
+      <span class="viz-legend-item"><span class="viz-legend-dot" style="background:var(--amber-bg)"></span>Weak / fragmented</span>
+      <span class="viz-legend-item"><span class="viz-legend-dot" style="background:var(--teal-bg)"></span>Has something</span>
+      <span class="viz-legend-item"><span class="viz-legend-dot" style="background:rgba(136,135,128,0.08)"></span>Unknown</span>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="sg-table" id="sg-tbl"></table>
+    </div>
+  </div>
+</section>
+
+<!-- Dundon Empire -->
+<section id="dundon-empire">
+  <h2>Dundon's vertical empire</h2>
+  <p class="section-subtitle">Tom Dundon controls the entire pro pickleball value chain — except facility operations and team engagement. Those two gaps are exactly where MatchFlow lives.</p>
+
+  <div class="viz-container" id="empire-root"></div>
+</section>
+
+<!-- Court Count Chart -->
+<section id="court-chart">
+  <h2>Target scale comparison</h2>
+  <p class="section-subtitle">Court count across all target facilities. Hover any bar to see software situation. Size matters — but so does the gap.</p>
+
+  <div class="viz-container">
+    <div class="viz-legend">
+      <span class="viz-legend-item"><span class="viz-legend-dot" style="background:var(--purple)"></span>Cuban orbit</span>
+      <span class="viz-legend-item"><span class="viz-legend-dot" style="background:var(--text-dim)"></span>Outside orbit</span>
+      <span class="viz-legend-item"><span class="viz-legend-dot" style="background:var(--text-dim);opacity:0.4"></span>Franchise (not direct ops)</span>
+    </div>
+    <div style="position:relative;width:100%;height:420px">
+      <canvas id="courtChart" role="img" aria-label="Court count comparison across target facilities">Court counts by facility</canvas>
+    </div>
+  </div>
+</section>
+
+<!-- Warm-Intro Paths -->
+<section id="intro-paths">
+  <h2>Warm-intro paths to Cuban</h2>
+  <p class="section-subtitle">Five distinct routes from MatchFlow to Mark Cuban, scored by hop count and strength. Click each path to see the full strategy.</p>
+
+  <div id="paths-root"></div>
+</section>
+
+<!-- Action Plan -->
+<section id="action-plan">
+  <h2>12-month action plan</h2>
+  <p class="section-subtitle">The sequence: land revenue, build credibility, earn a warm path to Cuban.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px">
+    <div>
+      <h3 style="color:var(--clay);margin-bottom:16px">Execution timeline</h3>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-time">Month 1–2</div>
+          <div class="tl-title">Close Banner House or initiate pilot</div>
+          <div class="tl-desc">Simultaneously approach Chicken N Pickle and Ace Pickleball for commercial deals. Begin DUPR integration development.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-time">Month 3–4</div>
+          <div class="tl-title">Deploy at first facility + Flash pilot</div>
+          <div class="tl-desc">Reach out to Molthan with Dallas Flash pilot proposal anchored to Road to Minors. Contact David Kass with Pickle & Chill proposal.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-time">Month 5–6</div>
+          <div class="tl-title">DUPR integration live + reference customer</div>
+          <div class="tl-desc">Use Banner House as reference for Molthan pitch. If Flash pilot underway, generate usage metrics. Approach Pardoe with league partnership.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-time">Month 7–9</div>
+          <div class="tl-title">Request introductions</div>
+          <div class="tl-desc">With paying customers and Flash pilot data, request introductions through Molthan or Wagner. Explore Nowitzki family path via Banner House.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-time">Month 10–12</div>
+          <div class="tl-title">Cuban meeting</div>
+          <div class="tl-desc">"We're already powering your team's fan community, your friend's racquet club, and facilities across the country. Here's what we could do together at league scale."</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3 style="color:var(--clay);margin-bottom:16px">Credibility-first plays</h3>
+      <div class="card">
+        <div class="card-title">1. Integrate with DUPR</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-top:6px">Non-negotiable table stakes. 1M+ rated players, 8K+ clubs. Official rating for UPA, USA Pickleball, Life Time, The Picklr. If MatchFlow syncs with DUPR, it instantly gains credibility across the entire ecosystem.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">2. Land one prominent Dallas facility</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-top:6px">Banner House is ideal. A MatchFlow-powered experience at Dallas's most prestigious racquet club gives you a proof point everyone in Cuban's orbit can see firsthand.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">3. Publish thought leadership</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-top:6px">The court booking software market is projected to reach $1.09B. Position MatchFlow in The Dink, Pickleball Magazine, Tennis Industry, SportTechie as the expert voice on multi-sport facility operations.</p>
+      </div>
+      
+      <h3 style="color:var(--clay);margin-bottom:16px;margin-top:24px">Sport-specific positioning</h3>
+      <div class="card">
+        <div class="card-title"><span class="tag tag-teal" style="margin-right:6px">Tennis</span> The Orreco angle</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-top:6px">Cuban's Orreco/DDSA investment shows direct interest in tennis tech. Position MatchFlow as serving the converging tennis-pickleball-padel market.</p>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="tag tag-purple" style="margin-right:6px">Pickleball</span> The professionalization play</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-top:6px">MLP is professionalizing ($70M revenue, 40% growth) but facility tech is shockingly underdeveloped. MatchFlow is the Mindbody moment for racquet sports.</p>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="tag tag-clay" style="margin-right:6px">Padel</span> The whitespace opportunity</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-top:6px">688 U.S. courts growing to 6,800 by 2030. Playtomic dominates globally but has limited NA customization. MatchFlow = the North American multi-sport alternative.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Methodology -->
+<section id="methodology" style="border-bottom:none">
+  <h2>Methodology & evidence standards</h2>
+  <p class="section-subtitle">This report uses public, ethical, business-relevant information only. No private personal data. No speculation presented as fact.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">
+    <div class="card">
+      <div class="card-title">Source hierarchy</div>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:8px">1. Official company, team, league websites<br>2. Ownership/investor/team pages<br>3. Press releases<br>4. Business media (Sportico, Front Office Sports, D Magazine)<br>5. Sports business publications<br>6. Local business journals<br>7. Public interviews and podcasts</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Evidence classification</div>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:8px"><span class="tag tag-teal">Confirmed</span> Multiple credible sources agree<br><br><span class="tag tag-amber">Credible</span> Single strong source or consistent indirect evidence<br><br><span class="tag tag-red">Speculative</span> Weak sourcing, rumor, or inference — flagged explicitly</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Key gaps to resolve</div>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:8px">Pickler Universe ownership not publicly disclosed. Banner House's actual booking system unknown (discovery call needed). Whether Isner/Herjavec/Parsons retained Flash equity after restructuring is unconfirmed. Chicken N Pickle's replacement booking platform is in evaluation — timing is critical.</p>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <div class="footer-logo">MatchFlow</div>
+  <p>Racquet sports club operations platform</p>
+  <p style="margin-top:8px;font-size:11px">This report is proprietary strategic research. All data sourced from public records.</p>
+</div>
+
+<script>
+// ==========================================
+// NETWORK MAP
+// ==========================================
+const netNodes = [
+  {id:'cuban',label:'Mark Cuban',x:340,y:260,r:28,color:'#7F77DD',type:'person',filter:'direct',
+   info:'<strong>Mark Cuban</strong> — passive co-owner of Dallas Flash (MLP). No facility operations. Sports-tech investor (Orreco/DDSA, Mustard, Harbinger). <span class="tag tag-purple">Hub node</span>'},
+  {id:'molthan',label:'Mark Molthan',x:180,y:160,r:20,color:'#7F77DD',type:'person',filter:'direct',
+   info:'<strong>Mark Molthan</strong> — Managing Director, Dallas Flash. Luxury homebuilder (Platinum Series). <span class="tag tag-purple">Direct</span> <span class="tag tag-teal">Tier 1</span><br>Plays 5x/week. Runs Road to Minors. Primary operational decision-maker for Cuban\'s team.'},
+  {id:'wagner',label:'Todd Wagner',x:500,y:140,r:18,color:'#7F77DD',type:'person',filter:'direct',
+   info:'<strong>Todd Wagner</strong> — Co-owner Dallas Flash, 30-year business partner. <span class="tag tag-purple">Direct</span><br>Co-founded Broadcast.com ($5.7B exit). Highest-trust bridge to Cuban.'},
+  {id:'dundon',label:'Tom Dundon',x:540,y:300,r:22,color:'#4A7FA5',type:'person',filter:'direct',
+   info:'<strong>Tom Dundon</strong> — Owns PPA Tour, MLP, Pickleball Central, pickleball.com. <span class="tag tag-blue">Direct (friend)</span><br>25-year friendship. Controls entire pro pickleball ecosystem. Owns competing software.'},
+  {id:'herjavec',label:'Robert Herjavec',x:160,y:360,r:16,color:'#7F77DD',type:'person',filter:'direct',
+   info:'<strong>Robert Herjavec</strong> — Shark Tank co-star, original Dallas PB Club co-owner. <span class="tag tag-purple">Direct</span><br>17 years on set with Cuban. Active player. No facility ops, but strong bridge value.'},
+  {id:'nowitzki',label:'Dirk Nowitzki',x:480,y:420,r:16,color:'#7F77DD',type:'person',filter:'direct',
+   info:'<strong>Dirk Nowitzki</strong> — Original Dallas PB Club co-owner. <span class="tag tag-purple">Direct</span><br>Wife Jessica curates art at Banner House. Celebrity bridge to facility.'},
+  {id:'isner',label:'John Isner',x:120,y:260,r:15,color:'#1D9E75',type:'person',filter:'direct',
+   info:'<strong>John Isner</strong> — Retired ATP top-10, Selkirk ambassador, Dallas-based. <span class="tag tag-teal">Direct</span><br>Tennis-to-pickleball bridge. Advisory/ambassador value.'},
+  {id:'parsons',label:'Chandler Parsons',x:220,y:460,r:14,color:'#7F77DD',type:'person',filter:'direct',
+   info:'<strong>Chandler Parsons</strong> — ex-Maverick, deepest personal friendship. <span class="tag tag-purple">Direct</span><br>No operational role. Late-stage intro only.'},
+  {id:'pardoe',label:'Connor Pardoe',x:600,y:200,r:18,color:'#4A7FA5',type:'person',filter:'indirect',
+   info:'<strong>Connor Pardoe</strong> — CEO of UPA/PPA/MLP. <span class="tag tag-blue">Indirect</span> <span class="tag tag-teal">Tier 1 network</span><br>Controls all league tech partnerships. The Picklr board member.'},
+  {id:'flash',label:'Dallas Flash',x:260,y:100,r:17,color:'#7F77DD',type:'facility',filter:'direct',
+   info:'<strong>Dallas Flash</strong> — MLP team, 2024 champions. <span class="tag tag-purple">Direct</span> <span class="tag tag-teal">Tier 1</span><br>Shopify-only tech. Zero fan platform. Home venue: Pickler Universe.'},
+  {id:'pickler_u',label:'Pickler Universe',x:100,y:100,r:15,color:'#7F77DD',type:'facility',filter:'indirect',
+   info:'<strong>Pickler Universe</strong> — 26 courts, Carrollton TX. Flash home venue. <span class="tag tag-amber">Indirect</span><br>On CourtReserve. Expanding to 2nd location.'},
+  {id:'banner',label:'Banner House',x:400,y:460,r:20,color:'#D85A30',type:'facility',filter:'indirect',
+   info:'<strong>Banner House at T Bar M</strong> — 45+ courts (tennis/PB/padel), $70M. <span class="tag tag-amber">Indirect</span> <span class="tag tag-teal">Tier 1</span><br><span class="tag tag-red">No visible booking tech.</span> Jessica Nowitzki curates art.'},
+  {id:'wood',label:'Brady Wood',x:310,y:480,r:16,color:'#D85A30',type:'person',filter:'indirect',
+   info:'<strong>Brady Wood / WoodHouse</strong> — CEO, built Banner House ($70M). <span class="tag tag-amber">Indirect</span> <span class="tag tag-teal">Tier 1</span><br>Hospitality empire. Former $250M RE fund. Overlooked high-value target.'},
+  {id:'kass',label:'David Kass',x:620,y:420,r:15,color:'#D85A30',type:'person',filter:'indirect',
+   info:'<strong>David Kass</strong> — Pickle & Chill owner + Columbus Sliders (MLP). <span class="tag tag-amber">Indirect</span> <span class="tag tag-teal">Tier 1</span><br>Former pro tennis player. Dual operator-owner. 2025 MLP champions.'},
+  {id:'upa',label:'UPA / PPA / MLP',x:600,y:100,r:16,color:'#4A7FA5',type:'facility',filter:'indirect',
+   info:'<strong>United Pickleball Association</strong> — parent of PPA Tour + MLP. <span class="tag tag-blue">Indirect</span><br>~$70M revenue, 40% YoY growth.'},
+  {id:'orreco',label:'Orreco / DDSA',x:200,y:220,r:13,color:'#1D9E75',type:'facility',filter:'direct',
+   info:'<strong>Orreco / DDSA</strong> — Sports analytics, tennis AI. <span class="tag tag-teal">Direct (investor $4M)</span>'},
+  {id:'mustard',label:'Mustard',x:130,y:180,r:12,color:'#6B6960',type:'facility',filter:'direct',
+   info:'<strong>Mustard</strong> — AI coaching app, $3.75M via Shark Tank. <span class="tag tag-amber">Direct (investor)</span>'},
+  {id:'stein',label:'Jason Stein',x:620,y:310,r:14,color:'#D85A30',type:'person',filter:'indirect',
+   info:'<strong>Jason Stein / SC Holdings</strong> — Lead UPA investor ($75M), board. Owns The Racquet Lounge. <span class="tag tag-amber">Indirect</span>'},
+  {id:'chaifetz',label:'R. Chaifetz',x:560,y:470,r:13,color:'#7F77DD',type:'person',filter:'indirect',
+   info:'<strong>Richard Chaifetz</strong> — Billionaire. St. Louis Shock, The Picklr investor, UPA/DUPR equity. <span class="tag tag-amber">Indirect</span>'}
+];
+const netEdges = [
+  {from:'cuban',to:'molthan',w:4},{from:'cuban',to:'wagner',w:4},{from:'cuban',to:'dundon',w:3},
+  {from:'cuban',to:'herjavec',w:2.5},{from:'cuban',to:'nowitzki',w:2.5},{from:'cuban',to:'isner',w:2},
+  {from:'cuban',to:'parsons',w:2},{from:'cuban',to:'flash',w:3.5},{from:'cuban',to:'orreco',w:2},
+  {from:'cuban',to:'mustard',w:1.5},{from:'molthan',to:'flash',w:3.5},{from:'wagner',to:'flash',w:2.5},
+  {from:'flash',to:'pickler_u',w:2},{from:'nowitzki',to:'banner',w:2},{from:'wood',to:'banner',w:3.5},
+  {from:'dundon',to:'upa',w:4},{from:'pardoe',to:'upa',w:3.5},{from:'kass',to:'upa',w:1.5},
+  {from:'stein',to:'upa',w:2},{from:'chaifetz',to:'upa',w:1.5}
+];
+const nodeMap={};netNodes.forEach(n=>nodeMap[n.id]=n);
+
+function drawNet(filter) {
+  const svg = document.getElementById('net-svg');
+  svg.innerHTML = '';
+  const ns = 'http://www.w3.org/2000/svg';
+  let fNodes = filter==='all'?netNodes:netNodes.filter(n=>{
+    if(filter==='direct')return n.filter==='direct';
+    if(filter==='indirect')return n.filter==='indirect';
+    if(filter==='facility')return n.type==='facility';
+    if(filter==='person')return n.type==='person';return true;});
+  const ids=new Set(fNodes.map(n=>n.id));
+  if(!ids.has('cuban')){fNodes=[netNodes[0],...fNodes];ids.add('cuban');}
+  const fEdges=netEdges.filter(e=>ids.has(e.from)&&ids.has(e.to));
+  fEdges.forEach(e=>{
+    const a=nodeMap[e.from],b=nodeMap[e.to];if(!a||!b)return;
+    const l=document.createElementNS(ns,'line');
+    l.setAttribute('x1',a.x);l.setAttribute('y1',a.y);l.setAttribute('x2',b.x);l.setAttribute('y2',b.y);
+    l.setAttribute('stroke','rgba(255,255,255,0.08)');l.setAttribute('stroke-width',e.w||1.5);
+    svg.appendChild(l);});
+  fNodes.forEach(n=>{
+    const g=document.createElementNS(ns,'g');g.style.cursor='pointer';
+    g.addEventListener('click',()=>document.getElementById('net-info').innerHTML=n.info);
+    const c=document.createElementNS(ns,'circle');
+    c.setAttribute('cx',n.x);c.setAttribute('cy',n.y);c.setAttribute('r',n.r);
+    c.setAttribute('fill',n.color+'22');c.setAttribute('stroke',n.color);
+    c.setAttribute('stroke-width',n.id==='cuban'?'2':'1');g.appendChild(c);
+    const lines=n.label.split('\n');
+    lines.forEach((line,i)=>{const t=document.createElementNS(ns,'text');
+      t.setAttribute('x',n.x);t.setAttribute('y',n.y+n.r+14+(i*13));
+      t.setAttribute('text-anchor','middle');t.setAttribute('fill','#c2c0b6');
+      t.setAttribute('font-size',n.id==='cuban'?'13':'11');
+      t.setAttribute('font-weight',n.id==='cuban'?'500':'400');
+      t.setAttribute('font-family','Source Sans 3, sans-serif');
+      t.textContent=line;g.appendChild(t);});
+    svg.appendChild(g);});
+}
+function filterNet(f,btn){
+  document.querySelectorAll('#net-filters .filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');drawNet(f);}
+drawNet('all');
+
+// ==========================================
+// SCORING MATRIX
+// ==========================================
+const scoreCols=['Proximity','Buy auth','SW need','Cust. value','Bridge value','Evidence'];
+const scoreTargets=[
+  {name:'Dallas Flash',type:'Team',tier:1,scores:[5,4,5,4,5,5]},
+  {name:'Mark Molthan',type:'Person',tier:1,scores:[5,4,4,4,5,5]},
+  {name:'Banner House',type:'Facility',tier:1,scores:[3,5,5,5,4,4]},
+  {name:'Brady Wood',type:'Person',tier:1,scores:[3,5,5,5,4,4]},
+  {name:'Connor Pardoe',type:'Person',tier:1,scores:[3,5,3,5,5,4]},
+  {name:'Todd Wagner',type:'Person',tier:1,scores:[5,3,2,3,5,5]},
+  {name:'Pickle & Chill',type:'Facility',tier:1,scores:[2,4,5,4,3,4]},
+  {name:'David Kass',type:'Person',tier:1,scores:[2,4,5,4,3,4]},
+  {name:'Tom Dundon',type:'Person',tier:2,scores:[4,5,2,3,4,4]},
+  {name:'Pickler Universe',type:'Facility',tier:1,scores:[4,3,4,4,3,3]},
+  {name:'Jason Stein',type:'Person',tier:2,scores:[2,4,4,4,3,3]},
+  {name:'Robert Herjavec',type:'Person',tier:2,scores:[4,1,1,2,5,4]},
+  {name:'Chandler Parsons',type:'Person',tier:3,scores:[5,1,1,1,4,4]},
+  {name:'John Isner',type:'Person',tier:3,scores:[4,1,1,2,3,4]}
+];
+scoreTargets.sort((a,b)=>{const at=a.scores.reduce((s,v)=>s+v,0);const bt=b.scores.reduce((s,v)=>s+v,0);return bt-at;});
+const stbl=document.getElementById('score-tbl');
+let shtml='<thead><tr><th style="text-align:left;min-width:110px">Target</th>';
+scoreCols.forEach(c=>shtml+='<th>'+c+'</th>');
+shtml+='<th>Total</th><th>Tier</th></tr></thead><tbody>';
+scoreTargets.forEach(t=>{
+  const total=t.scores.reduce((s,v)=>s+v,0);
+  shtml+='<tr><td><span class="score-name">'+t.name+'</span><br><span class="score-type">'+t.type+'</span></td>';
+  t.scores.forEach(s=>shtml+='<td><span class="score-dot sd-'+s+'">'+s+'</span></td>');
+  shtml+='<td class="score-total">'+total+'/30</td>';
+  shtml+='<td><span class="tier-badge tier-'+t.tier+'">Tier '+t.tier+'</span></td></tr>';});
+shtml+='</tbody>';stbl.innerHTML=shtml;
+
+// ==========================================
+// GRAVITY MAP
+// ==========================================
+(function(){
+const svg=document.getElementById('grav-svg');
+const ns='http://www.w3.org/2000/svg';
+const cx=340,cy=295;
+const rings=[110,195,280];
+const ringLabels=['1 hop from Cuban','2 hops','No direct link'];
+const techColors={none:'#E24B4A',weak:'#EF9F27',ok:'#1D9E75',unk:'#6B6960'};
+const tFill='rgba(127,119,221,0.12)';const oFill='rgba(216,90,48,0.12)';const gFill='rgba(136,135,128,0.08)';
+const facilities=[
+  {name:'Pickler Universe',courts:49,ring:0,angle:210,owner:'Private (Flash venue)',tech:'weak',techLabel:'CourtReserve',fill:tFill,
+   info:'<strong>Pickler Universe</strong> — 49 courts (expanding) · Carrollton + Irving, TX<br>Owner: Private (Dallas Flash home venue)<br>Software: <span class="tag tag-amber">CourtReserve</span> No branded app.<br>Path: <span class="tag tag-blue">1 hop</span> Flash home venue → Molthan → Cuban'},
+  {name:'Dallas Flash',courts:6,ring:0,angle:330,owner:'Cuban/Molthan/Wagner',tech:'none',techLabel:'Shopify only',fill:tFill,
+   info:'<strong>Dallas Flash</strong> — MLP team (no facility) · Dallas, TX<br>Owner: Cuban / Molthan / Wagner<br>Software: <span class="tag tag-red">Shopify only</span> Zero fan platform.<br>Path: <span class="tag tag-blue">Direct</span> Cuban co-owns'},
+  {name:'Banner House',courts:45,ring:1,angle:190,owner:'Brady Wood / WoodHouse',tech:'none',techLabel:'None visible',fill:tFill,
+   info:'<strong>Banner House at T Bar M</strong> — 45+ courts · Dallas, TX<br>Owner: Brady Wood / WoodHouse ($70M)<br>Software: <span class="tag tag-red">None visible</span> $70M facility, zero digital booking.<br>Path: <span class="tag tag-blue">2 hops</span> Nowitzki → Cuban'},
+  {name:'Pickle & Chill',courts:22,ring:1,angle:350,owner:'David Kass',tech:'weak',techLabel:'Fragmented',fill:tFill,
+   info:'<strong>Pickle & Chill</strong> — 22+ courts · Columbus, OH<br>Owner: David Kass (also Columbus Sliders MLP)<br>Software: <span class="tag tag-amber">Fragmented</span> WordPress + separate booking.<br>Path: <span class="tag tag-blue">2 hops</span> MLP owner → Cuban'},
+  {name:'Racquet Lounge',courts:8,ring:1,angle:260,owner:'Jason Stein',tech:'unk',techLabel:'Unknown',fill:tFill,
+   info:'<strong>The Racquet Lounge</strong> — ~8 courts · Southampton, NY<br>Owner: Jason Stein / SC Holdings ($75M UPA investor)<br>Software: <span class="tag tag-amber">Unknown</span><br>Path: <span class="tag tag-blue">2 hops</span> UPA board → Cuban'},
+  {name:'Kraken Padel',courts:4,ring:1,angle:215,owner:'Private',tech:'ok',techLabel:'Custom app',fill:tFill,
+   info:'<strong>Kraken Padel</strong> — 4 courts · Dallas, TX (T Bar M campus)<br>Software: <span class="tag tag-teal">Custom app + PlaySight</span><br>Path: <span class="tag tag-blue">2 hops</span> Banner House campus'},
+  {name:'Chicken N Pickle',courts:80,ring:2,angle:140,owner:'Johnson / Clarke',tech:'none',techLabel:'Abandoned Planyo',fill:oFill,
+   info:'<strong>Chicken N Pickle</strong> — 80+ courts, 12+ locations<br>Owner: Dave Johnson / Brad Clarke<br>Software: <span class="tag tag-red">Just abandoned Planyo, no replacement</span><br>Path: <span class="tag tag-amber">No Cuban link</span> Pure revenue target'},
+  {name:'Ace Pickleball',courts:150,ring:2,angle:40,owner:'Diederich / Sexton',tech:'none',techLabel:'Zero',fill:oFill,
+   info:'<strong>Ace Pickleball Club</strong> — 150+ courts, 22+ locations<br>Owner: Jay Diederich / Joe Sexton<br>Software: <span class="tag tag-red">Zero booking technology</span> Walk-in only.<br>Path: <span class="tag tag-amber">No Cuban link</span> Massive greenfield'},
+  {name:'The Picklr',courts:400,ring:2,angle:90,owner:'Jorge Barragan',tech:'weak',techLabel:'Buggy app',fill:gFill,
+   info:'<strong>The Picklr</strong> — 400+ courts, 500+ licensed<br>Owner: Jorge Barragan. Pardoe on board.<br>Software: <span class="tag tag-amber">Proprietary but buggy</span><br>Path: <span class="tag tag-amber">Weak indirect</span> via Pardoe'}
+];
+function el(tag,attrs){const e=document.createElementNS(ns,tag);for(const[k,v]of Object.entries(attrs))e.setAttribute(k,v);return e;}
+rings.forEach((r,i)=>{
+  svg.appendChild(el('circle',{cx,cy,r,fill:'none',stroke:'rgba(255,255,255,0.05)','stroke-width':'1','stroke-dasharray':'4 4'}));
+  const t=el('text',{x:cx+4,y:cy-r-6,'text-anchor':'middle',fill:'#4A4845','font-size':'10','font-family':'Source Sans 3,sans-serif'});
+  t.textContent=ringLabels[i];svg.appendChild(t);});
+svg.appendChild(el('circle',{cx,cy,r:14,fill:'rgba(127,119,221,0.2)',stroke:'#7F77DD','stroke-width':'1.5'}));
+const ct=el('text',{x:cx,y:cy+4,'text-anchor':'middle','dominant-baseline':'central',fill:'#E8E3D8','font-size':'11','font-weight':'500','font-family':'Source Sans 3,sans-serif'});
+ct.textContent='Cuban';svg.appendChild(ct);
+facilities.forEach(f=>{
+  const rr=rings[f.ring];const ar=(f.angle-90)*Math.PI/180;
+  const fx=cx+rr*Math.cos(ar),fy=cy+rr*Math.sin(ar);
+  const br=Math.max(8,Math.min(38,Math.sqrt(f.courts)*2.2));
+  svg.appendChild(el('line',{x1:cx,y1:cy,x2:fx,y2:fy,stroke:'rgba(255,255,255,0.06)','stroke-width':f.ring===0?'2':'1'}));
+  const g=document.createElementNS(ns,'g');g.style.cursor='pointer';
+  g.addEventListener('click',()=>document.getElementById('grav-info').innerHTML=f.info);
+  g.appendChild(el('circle',{cx:fx,cy:fy,r:br,fill:f.fill,stroke:techColors[f.tech],'stroke-width':f.tech==='none'?'2.5':'1.5'}));
+  const cl=el('text',{x:fx,y:fy+1,'text-anchor':'middle','dominant-baseline':'central',fill:'#E8E3D8','font-size':br>14?'12':'10','font-weight':'500','font-family':'JetBrains Mono,monospace'});
+  cl.textContent=f.courts>=100?f.courts+'+':f.courts;g.appendChild(cl);
+  const ny=fy+br+12;
+  const nt=el('text',{x:fx,y:ny,'text-anchor':'middle',fill:'#E8E3D8','font-size':'11','font-weight':'500','font-family':'Source Sans 3,sans-serif'});
+  nt.textContent=f.name;g.appendChild(nt);
+  const ot=el('text',{x:fx,y:ny+13,'text-anchor':'middle',fill:'#6B6960','font-size':'10','font-family':'Source Sans 3,sans-serif'});
+  ot.textContent=f.owner;g.appendChild(ot);
+  const tt=el('text',{x:fx,y:ny+25,'text-anchor':'middle',fill:techColors[f.tech],'font-size':'9','font-family':'Source Sans 3,sans-serif'});
+  tt.textContent=f.techLabel;g.appendChild(tt);
+  svg.appendChild(g);});
+})();
+
+// ==========================================
+// FACILITY OWNERSHIP
+// ==========================================
+(function(){
+const ownerData=[
+  {section:'Cuban orbit — direct ownership',owners:[
+    {name:'Cuban / Molthan / Wagner',role:'Co-owners',bg:'rgba(127,119,221,0.15)',color:'#AFA9EC',facilities:[
+      {name:'Dallas Flash',loc:'Dallas, TX',sports:['pb'],courts:'0',note:'team only',sw:'Shopify only',swC:'sw-bad',pain:'Zero fan engagement, no CRM',path:'Direct → Cuban co-owns',detail:'MLP team, 2024 champions. Molthan makes all operational decisions.'},
+      {name:'Pickler Universe',loc:'Carrollton + Irving, TX',sports:['pb'],courts:'26+',note:'49+ planned',sw:'CourtReserve',swC:'sw-ok',pain:'Multi-location expansion, no branded app',path:'Flash venue → Molthan → Cuban',detail:'Dallas Flash home venue. Expanding to second location.'}
+    ]}
+  ]},
+  {section:'Cuban orbit — indirect (1-2 hops)',owners:[
+    {name:'Brady Wood / WoodHouse',role:'CEO, developer',bg:'rgba(239,159,39,0.12)',color:'#EF9F27',facilities:[
+      {name:'Banner House at T Bar M',loc:'Dallas, TX',sports:['tn','pb','pd'],courts:'45+',note:'22+3+1+17+5',sw:'None visible',swC:'sw-bad',pain:'$70M facility, zero digital booking',path:'Nowitzki → Cuban',detail:'Most court-dense premium facility in Dallas. Jessica Nowitzki curates art program.'}
+    ]},
+    {name:'David Kass',role:'Owner-operator + MLP team',bg:'rgba(29,158,117,0.12)',color:'#1D9E75',facilities:[
+      {name:'Pickle & Chill',loc:'Columbus, OH',sports:['pb','tn'],courts:'22+',note:'indoor + outdoor',sw:'Unknown (fragmented)',swC:'sw-bad',pain:'WordPress + separate booking subdomain',path:'MLP owner → network → Cuban',detail:'Also owns Columbus Sliders (2025 MLP champs). Former pro tennis player.'}
+    ]},
+    {name:'Jason Stein / SC Holdings',role:'Lead UPA investor',bg:'rgba(216,90,48,0.12)',color:'#D85A30',facilities:[
+      {name:'The Racquet Lounge',loc:'Southampton, NY',sports:['tn','pb','pd'],courts:'~8',note:'multi-sport',sw:'Unknown',swC:'sw-unk',pain:'Limited public info on tech stack',path:'UPA board → Pardoe → Cuban',detail:'$75M UPA investment, board member. Multi-sport facility operator.'}
+    ]}
+  ]},
+  {section:'Outside orbit — highest commercial value',owners:[
+    {name:'Johnson / Clarke',role:'Founder / CEO',bg:'rgba(136,135,128,0.1)',color:'#9C9A92',facilities:[
+      {name:'Chicken N Pickle',loc:'12+ US locations',sports:['pb'],courts:'80+',note:'all locations',sw:'Abandoned Planyo',swC:'sw-bad',pain:'Phone cancellations. No app. No membership.',path:'No Cuban link',detail:'Just dropped booking platform. Largest addressable gap in PB.'}
+    ]},
+    {name:'Diederich / Sexton',role:'CEO / President',bg:'rgba(136,135,128,0.1)',color:'#9C9A92',facilities:[
+      {name:'Ace Pickleball Club',loc:'22+ US (75+ planned)',sports:['pb'],courts:'150+',note:'all locations',sw:'Zero booking tech',swC:'sw-bad',pain:'Walk-in only. No data capture.',path:'No Cuban link',detail:'Fastest-growing PB chain. CBRE partnership for expansion.'}
+    ]}
+  ]}
+];
+const root=document.getElementById('ownership-root');
+const sportPill=s=>({pb:['Pickleball','pill-pb'],tn:['Tennis','pill-tn'],pd:['Padel','pill-pd']}[s]||['Multi','pill-pb']);
+let uid=0;
+ownerData.forEach(sec=>{
+  const div=document.createElement('div');div.className='owner-section';
+  div.innerHTML='<div class="owner-section-label">'+sec.section+'</div>';
+  sec.owners.forEach(o=>{
+    let h='<div class="owner-row"><div class="owner-badge" style="background:'+o.bg+'"><div class="owner-badge-name" style="color:'+o.color+'">'+o.name+'</div><div class="owner-badge-role" style="color:'+o.color+'">'+o.role+'</div></div><div class="fac-list">';
+    o.facilities.forEach(f=>{
+      const id='fc-'+(uid++);
+      h+='<div class="fac-card" id="'+id+'" onclick="document.getElementById(\''+id+'\').classList.toggle(\'expanded\')">';
+      h+='<div class="fac-top"><div><span class="fac-name">'+f.name+'</span> <span class="fac-loc">'+f.loc+'</span></div>';
+      h+='<div class="fac-courts"><span class="fac-courts-num">'+f.courts+'</span><br><span class="fac-courts-note">'+f.note+'</span></div></div>';
+      h+='<div class="fac-pills">'+f.sports.map(s=>{const[l,c]=sportPill(s);return'<span class="pill '+c+'">'+l+'</span>';}).join('')+'</div>';
+      h+='<div class="fac-detail"><div class="fac-detail-row"><span class="fac-detail-label">Software</span><span class="'+f.swC+'">'+f.sw+'</span></div>';
+      h+='<div class="fac-detail-row"><span class="fac-detail-label">Pain points</span><span>'+f.pain+'</span></div>';
+      h+='<div style="margin-top:6px">'+f.detail+'</div>';
+      h+='<div class="cuban-path-tag">'+f.path+'</div></div></div>';
+    });
+    h+='</div></div>';div.innerHTML+=h;});
+  root.appendChild(div);});
+})();
+
+// ==========================================
+// SOFTWARE GAP TABLE
+// ==========================================
+(function(){
+const cols=['Booking','Mobile app','CRM','Matchmaking','League mgmt','Member portal'];
+const facs=[
+  {name:'Banner House',owner:'Brady Wood',courts:45,scores:[0,0,0,0,0,0],opp:'hot',oppL:'Wide open'},
+  {name:'Ace Pickleball',owner:'Diederich/Sexton',courts:150,scores:[0,0,0,0,0,0],opp:'hot',oppL:'Wide open'},
+  {name:'Chicken N Pickle',owner:'Johnson/Clarke',courts:80,scores:[0,0,0,0,1,0],opp:'hot',oppL:'In transition'},
+  {name:'Dallas Flash',owner:'Molthan',courts:0,scores:[3,0,0,0,0,0],opp:'hot',oppL:'Zero platform'},
+  {name:'Pickle & Chill',owner:'David Kass',courts:22,scores:[1,0,1,0,1,1],opp:'warm',oppL:'Fragmented'},
+  {name:'Pickler Universe',owner:'Private',courts:26,scores:[2,0,1,0,1,2],opp:'warm',oppL:'Incumbent'},
+  {name:'The Picklr',owner:'Barragan',courts:400,scores:[2,1,2,0,1,1],opp:'warm',oppL:'Quality gap'},
+  {name:'Racquet Lounge',owner:'Jason Stein',courts:8,scores:[3,3,3,3,3,3],opp:'cool',oppL:'Needs recon'}
+];
+facs.sort((a,b)=>b.scores.filter(s=>s===0).length-a.scores.filter(s=>s===0).length);
+const cls=v=>v===0?'sg-none':v===1?'sg-weak':v===2?'sg-ok':'sg-unk';
+const sym=v=>v===0?'\u2717':v===1?'~':v===2?'\u2713':'?';
+const tbl=document.getElementById('sg-tbl');
+let h='<thead><tr><th>Facility</th>';cols.forEach(c=>h+='<th>'+c+'</th>');
+h+='<th>Gap</th><th>Opp.</th></tr></thead><tbody>';
+facs.forEach(f=>{
+  const gap=f.scores.filter(s=>s===0).length;
+  h+='<tr><td><span class="score-name">'+f.name+'</span><br><span class="score-type">'+f.owner+' · '+(f.courts>0?f.courts+' courts':'team')+'</span></td>';
+  f.scores.forEach(s=>h+='<td><span class="sg-cell '+cls(s)+'">'+sym(s)+'</span></td>');
+  h+='<td class="sg-score">'+gap+'/6</td>';
+  h+='<td><span class="tag opp-'+f.opp+'">'+f.oppL+'</span></td></tr>';});
+h+='</tbody>';tbl.innerHTML=h;
+})();
+
+// ==========================================
+// DUNDON EMPIRE
+// ==========================================
+(function(){
+const root=document.getElementById('empire-root');
+const layers=[
+  {label:'League ownership',labelBg:'var(--red-bg)',labelColor:'var(--red)',items:[
+    {name:'PPA Tour',desc:'Pro tour — all major events',cls:'empire-owned'},
+    {name:'Major League Pickleball',desc:'22+ teams incl. Cuban\'s Flash',cls:'empire-owned'},
+    {name:'UPA (parent)',desc:'~$70M revenue, unified body',cls:'empire-owned'}]},
+  {label:'Software + data',labelBg:'var(--red-bg)',labelColor:'var(--red)',items:[
+    {name:'PickleballTournaments.com',desc:'Tournament mgmt + club listings',cls:'empire-competes'},
+    {name:'Pickleball Brackets',desc:'Bracket generation + scoring',cls:'empire-competes'},
+    {name:'DUPR (partnership)',desc:'1M+ rated players, 8K+ clubs',cls:'empire-owned'}]},
+  {label:'E-commerce',labelBg:'var(--amber-bg)',labelColor:'var(--amber)',items:[
+    {name:'Pickleball Central',desc:'Leading equipment retailer',cls:'empire-owned'}]},
+  {label:'Media + content',labelBg:'var(--amber-bg)',labelColor:'var(--amber)',items:[
+    {name:'Pickleball.com',desc:'News, content, community',cls:'empire-owned'},
+    {name:'TopCourt',desc:'Instructional video platform',cls:'empire-owned'}]},
+  {label:'Facility ops',labelBg:'var(--teal-bg)',labelColor:'var(--teal)',items:[
+    {name:'MatchFlow opportunity',desc:'Facility booking, member experience, court ops, matchmaking, club CRM',cls:'empire-gap'}]},
+  {label:'Team ops',labelBg:'var(--blue-bg)',labelColor:'var(--blue)',items:[
+    {name:'MatchFlow opportunity',desc:'Fan engagement, amateur pipelines, community, team CRM',cls:'empire-gap'}]}
+];
+let h='';
+layers.forEach(l=>{
+  h+='<div class="empire-layer"><div class="empire-label" style="background:'+l.labelBg+';color:'+l.labelColor+'">'+l.label+'</div><div class="empire-items">';
+  l.items.forEach(i=>h+='<div class="empire-item '+i.cls+'"><div class="empire-item-name">'+i.name+'</div><div class="empire-item-desc">'+i.desc+'</div></div>');
+  h+='</div></div>';});
+h+='<div class="viz-legend" style="margin-top:12px"><span class="viz-legend-item"><span style="width:3px;height:14px;border-radius:1px;background:var(--red);display:inline-block"></span>Dundon owns</span>';
+h+='<span class="viz-legend-item"><span style="width:3px;height:14px;border-radius:1px;background:var(--amber);display:inline-block"></span>Competes with MatchFlow</span>';
+h+='<span class="viz-legend-item"><span style="width:3px;height:14px;border-radius:1px;background:var(--teal);display:inline-block"></span>Gap MatchFlow can fill</span></div>';
+root.innerHTML=h;
+})();
+
+// ==========================================
+// COURT COUNT CHART
+// ==========================================
+new Chart(document.getElementById('courtChart'),{
+  type:'bar',
+  data:{
+    labels:['The Picklr (500+ licensed)','Ace Pickleball Club (22+ loc.)','Chicken N Pickle (12+ loc.)','Pickler Universe (expanding)','Banner House at T Bar M','Pickle & Chill','Chaifetz Arena (events)','The Racquet Lounge','Kraken Padel Club'],
+    datasets:[{data:[400,150,80,49,45,22,16,8,4],
+      backgroundColor:['rgba(127,119,221,0.2)','rgba(136,135,128,0.4)','rgba(136,135,128,0.4)','rgba(127,119,221,0.4)','rgba(127,119,221,0.4)','rgba(127,119,221,0.4)','rgba(127,119,221,0.2)','rgba(127,119,221,0.3)','rgba(127,119,221,0.3)'],
+      borderColor:['#7F77DD','#6B6960','#6B6960','#7F77DD','#7F77DD','#7F77DD','#7F77DD','#7F77DD','#7F77DD'],
+      borderWidth:1,borderRadius:4,barPercentage:0.7}]},
+  options:{
+    indexAxis:'y',responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{afterLabel:function(c){
+      return['Franchise · buggy proprietary app','Zero booking tech · walk-in only','Just abandoned Planyo · no replacement',
+             'CourtReserve · expanding to 2nd site','No visible booking · $70M facility','Fragmented · owner also has MLP team',
+             'Arena venue · Chaifetz invested','Multi-sport · UPA board member owns','Custom app + PlaySight · 4 padel courts'][c.dataIndex];}}}},
+    scales:{
+      x:{title:{display:true,text:'Courts (current or planned)',color:'#6B6960',font:{size:11,family:'Source Sans 3'}},
+         grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#6B6960',font:{size:11,family:'JetBrains Mono'}}},
+      y:{grid:{display:false},ticks:{color:'#9C9A92',font:{size:11,family:'Source Sans 3'}}}
+    }
+  }
+});
+
+// ==========================================
+// WARM-INTRO PATHS
+// ==========================================
+(function(){
+const paths=[
+  {label:'Path 1: Molthan',str:'strong',hops:1,
+   nodes:['MatchFlow','Dallas Flash pilot','Mark Molthan','Mark Cuban'],
+   edges:['solve Road to Minors gap','proves value as MD','co-owner trust'],
+   detail:'Win Molthan by solving his biggest operational gap — the Dallas Flash has no fan engagement platform, no CRM, no community. Build a free pilot around Road to Minors amateur pipeline with DUPR sync. When Molthan sees results, he tells Cuban directly. One hop, highest trust.'},
+  {label:'Path 2: Banner House → Nowitzki',str:'strong',hops:2,
+   nodes:['MatchFlow','Banner House customer','Brady Wood / Jessica Nowitzki','Dirk Nowitzki','Mark Cuban'],
+   edges:['white-label premium platform','operates + curates','family','21-year bond'],
+   detail:'Banner House spent $70M on architecture but has zero booking tech. Deliver a luxury member experience across 45+ courts. Jessica Nowitzki\'s art curation creates a bridge to Dirk, who co-founded Dallas Pickleball Club with Cuban.'},
+  {label:'Path 3: Pardoe / UPA',str:'medium',hops:2,
+   nodes:['MatchFlow','MLP team ops platform','Connor Pardoe (CEO)','Team owner comms','Mark Cuban'],
+   edges:['team pilot wins','league partnership','institutional','owner stakeholder'],
+   detail:'Pardoe controls all technology partnerships for professional pickleball. Pilot with 1-2 MLP teams, then present results as league-wide infrastructure. Institutional path — slower but scales.'},
+  {label:'Path 4: David Kass → MLP owners',str:'medium',hops:2,
+   nodes:['MatchFlow','Pickle & Chill customer','David Kass','MLP owner network','Mark Cuban'],
+   edges:['unified platform','operator advocate','peer recommendation','owner circle'],
+   detail:'Kass owns both Pickle & Chill and the Columbus Sliders (2025 MLP champs). Solve his fragmented tech, then leverage his credibility with fellow MLP owners to reach Cuban\'s group.'},
+  {label:'Path 5: Herjavec',str:'medium',hops:1,
+   nodes:['MatchFlow','Tech/investment pitch','Robert Herjavec','Mark Cuban'],
+   edges:['sports-tech opportunity','endorsement','17-year Shark Tank bond'],
+   detail:'Position MatchFlow as a sports-tech investment opportunity. Frame around the $420M court booking software market. If Herjavec finds it compelling, his endorsement to Cuban is worth more than any cold outreach.'}
+];
+const root=document.getElementById('paths-root');
+let pid=0;
+paths.forEach(p=>{
+  const id='path-'+(pid++);
+  const strCls=p.str==='strong'?'tag-teal':'tag-amber';
+  let flow='<div class="path-flow">';
+  p.nodes.forEach((n,j)=>{
+    const cls=j===0?'pn-start':j===p.nodes.length-1?'pn-end':'pn-mid';
+    if(j>0)flow+='<div style="display:flex;flex-direction:column;align-items:center"><span class="path-arrow">\u2192</span>'+(p.edges[j-1]?'<span class="path-edge">'+p.edges[j-1]+'</span>':'')+'</div>';
+    flow+='<span class="path-node '+cls+'">'+n+'</span>';});
+  flow+='</div>';
+  const card=document.createElement('div');card.className='path-card';card.id=id;
+  card.onclick=function(){document.querySelectorAll('.path-card').forEach(c=>c.classList.remove('expanded'));this.classList.add('expanded');};
+  card.innerHTML='<div class="path-header"><span class="path-label">'+p.label+'</span><div class="path-meta"><span style="font-size:11px;color:var(--text-dim)">'+p.hops+' hop'+(p.hops>1?'s':'')+'</span><span class="tag '+strCls+'">'+p.str+'</span></div></div>'+flow+'<div class="path-detail">'+p.detail+'</div>';
+  root.appendChild(card);});
+})();
+
+// ==========================================
+// NAV SCROLL HIGHLIGHTING
+// ==========================================
+const sections=document.querySelectorAll('section[id]');
+const navLinks=document.querySelectorAll('.nav-link');
+window.addEventListener('scroll',()=>{
+  let current='';
+  sections.forEach(s=>{if(window.scrollY>=s.offsetTop-120)current=s.id;});
+  navLinks.forEach(l=>{l.classList.remove('active');if(l.getAttribute('href')==='#'+current)l.classList.add('active');});
+},{passive:true});
+</script>
+
+</body>
+</html>
